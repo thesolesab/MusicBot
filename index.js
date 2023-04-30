@@ -2,9 +2,9 @@ const TelegramApi = require('node-telegram-bot-api')
 const easyvk = require('easyvk')
 const { default: axios } = require('axios')
 const cheerio = require('cheerio')
+require('dotenv').config()
 
-
-const token = '5956258595:AAHkmc7neMzsM8qbh2QsNOBjGf4wDZx56fM'
+const token = process.env.TOKEN
 
 
 const httpReg = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9\-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-\/])*)?/;
