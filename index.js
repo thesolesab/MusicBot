@@ -11,16 +11,25 @@ const httpReg = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za
 
 const bot = new TelegramApi(token, { polling: true })
 
-
-
-
 async function parser(link) {
     const data = await axios.get(link).then(data => {
-
+        console.log(data);
+        const path = { title: '', artists: '' }
         const $ = cheerio.load(data.data)
 
-        const title = $('div.sidebar__title.sidebar-track__title.deco-type.typo-h2 > span > a').text()
-        const artists = $('div.page-album__artists-short > span > a').text()
+
+        if (!!link.match(/yandex/i)) {
+            path.title = 'div.sidebar__title.sidebar-track__title.deco-type.typo-h2 > span > a'
+            path.artists = 'div.page-album__artists-short > span > a'
+        }
+        if (!!link.match(/spotify/i)) {
+            path.title = 'title'
+            path.artists = ''
+        }
+
+
+        const title = $(path.title).text()
+        const artists = $(path.artists).text()
 
         return { artists, title }
     })
@@ -51,7 +60,7 @@ const start = async () => {
                 return bot.sendMessage(chatId, `В силу ленивости и легкой не компетентности моего разработчика, я умею только лишь возвращать название трека по ссылке на него в яндекс музыку =))`)
             }
 
-            if (!!text.match(httpReg) & !!text.match(/yandex/i)) {
+            if (!!text.match(httpReg)) {
                 const sss = await parser(text)
 
                 bot.sendMessage(chatId, `Ты прислал мне трек  \`${sss.artists} - ${sss.title}\``, { parse_mode: 'MarkdownV2' })
@@ -61,7 +70,6 @@ const start = async () => {
             return bot.sendMessage(chatId, `Я тебя не понимаю, попробуй еще раз`)
 
         } catch (error) {
-            console.log(error)
             return bot.sendMessage(chatId, 'Произошла какая то ошибочка!)')
         }
     })
