@@ -11,11 +11,7 @@ const httpReg = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za
 
 const bot = new TelegramApi(token, { polling: true })
 
-bot.setMyCommands([
-    { command: '/start', description: 'Начать' },
-    { command: '/info', description: 'Информация о боте' }
 
-])
 
 
 async function parser(link) {
@@ -33,67 +29,40 @@ async function parser(link) {
 }
 
 
+const start = async () => {
+    bot.setMyCommands([
+        { command: '/start', description: 'Начать' },
+        { command: '/info', description: 'Информация о боте' }
 
-bot.on('message', async msg => {
+    ])
 
-    const text = msg?.text
-    const chatId = msg?.chat?.id
+    bot.on('message', async msg => {
 
-    try {
-        if (!!text.match(httpReg) & !!text.match(/yandex/i)) {
-            const sss = await parser(text)
+        const text = msg?.text
+        const chatId = msg?.chat?.id
 
-            bot.sendMessage(chatId, `Ты прислал мне трек  \`${sss.artists} - ${sss.title}\``, { parse_mode: 'MarkdownV2' })
-            return
-        }
+        try {
+            if (text === '/start') {
+                await bot.sendSticker(chatId, 'https://cdn.tlgrm.app/stickers/c86/acf/c86acfa0-4fbc-3b4d-8b38-f8870d09f971/192/9.webp')
+                return bot.sendMessage(chatId, `Ну наконец-то ${msg.chat.username} решил заглянуть в лучший чат-бот для поиска музыки. Просто пришли мне ссылку на яндекс-музыку и я пришлю тебе название трека =))`)
+            }
 
-        if (!!text.match(httpReg) & !text.match(/yandex/i)) {
+            if (text === '/info') {
+                return bot.sendMessage(chatId, `В силу ленивости и легкой не компетентности моего разработчика, я умею только лишь возвращать название трека по ссылке на него в яндекс музыку =))`)
+            }
 
-            if (text === 'https://t.me/enewi_bot') {
-                bot.sendMessage(chatId, `Воу воу воу, секретный режим разблокирован`)
-                return
-            } else {
-                bot.sendMessage(chatId, `Ты прислал мне неверную ссылку`)
+            if (!!text.match(httpReg) & !!text.match(/yandex/i)) {
+                const sss = await parser(text)
+
+                bot.sendMessage(chatId, `Ты прислал мне трек  \`${sss.artists} - ${sss.title}\``, { parse_mode: 'MarkdownV2' })
                 return
             }
+
+            return bot.sendMessage(chatId, `Я тебя не понимаю, попробуй еще раз`)
+
+        } catch (error) {
+            console.log(error)
+            return bot.sendMessage(chatId, 'Произошла какая то ошибочка!)')
         }
-
-        switch (text) {
-            case '/start':
-                bot.sendMessage(chatId, `Ну наконец-то ${msg.chat.username} решил заглянуть в лучший чат-бот для поиска музыки. Просто пришли мне ссылку на яндекс-музыку и я пришлю тебе название трека =))`)
-                break
-            case '/info':
-                bot.sendMessage(chatId, `В силу ленивости и легкой не компетентности моего разработчика, я умею только лишь возвращать название трека по ссылке на него в яндекс музыку =))`)
-                break
-            case 'spoty':
-                bot.sendMessage(chatId, `Spooooty`)
-                break
-            default:
-                bot.sendMessage(chatId, `Я тебя не понимаю, попробуй еще раз`)
-        }
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-
-
-
-
-bot.on('inline_query', async ctx => {
-    let query = ctx.query
-
-    // let result = {
-    //     type: 'article',
-    //     id: Math.random(),
-    //     title: 'Вы искали',
-    //     input_message_content: {
-    //         message_text: `Вы искали ${query}`
-    //     }
-    // }
-
-    // bot.answerInlineQuery(ctx.id, result)
-    console.log(data)
-
-    // console.log(ctx)
-})
+    })
+}
