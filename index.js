@@ -12,24 +12,24 @@ const httpReg = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za
 const bot = new TelegramApi(token, { polling: true })
 
 async function parser(link) {
-    const data = await axios.get(link).then(data => {
-        console.log(data);
+    const data = await axios.get(link).then(async data => {
+
         const path = { title: '', artists: '' }
         const $ = cheerio.load(data.data)
 
 
         if (!!link.match(/yandex/i)) {
             path.title = 'div.sidebar__title.sidebar-track__title.deco-type.typo-h2 > span > a'
-            path.artists = 'div.page-album__artists-short > span > a'
+            path.artists = 'div.page-album__artists-short > span'
         }
         if (!!link.match(/spotify/i)) {
             path.title = 'title'
             path.artists = ''
         }
 
-
         const title = $(path.title).text()
-        const artists = $(path.artists).text()
+        const pageTitle = $('title').text()
+        const artists = pageTitle.split(title)[1].split('слушать')[0]
 
         return { artists, title }
     })
